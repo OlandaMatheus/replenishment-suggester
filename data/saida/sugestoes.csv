@@ -1,0 +1,47 @@
+﻿material;descricao;categoria;unidade;sugestao;demanda;est_filial;falta;est_cd;pc_filial;pc_cd;itens_ov;clientes;remessa_mais_antiga;dias_atraso;previsao_pc;fat_12m;qtd_compra
+830740;Estabilizador 500 VA;Energia;UN;Compra;23;8;15;0;0;0;3;3;21/10/2026;14;;296;89
+830536;Switch 8 portas gigabit;Redes e conectividade;UN;Compra;20;9;11;0;0;0;1;1;23/10/2026;12;;758;228
+830254;Pen drive 64 GB;Armazenamento;UN;Compra;63;28;35;0;0;0;4;3;26/10/2026;9;;59;35
+830784;Papel A4 75 g (caixa 10 resmas);Impressão;CX;Compra;6;1;5;0;0;0;1;1;27/10/2026;8;;324;98
+830706;Fonte para notebook 65 W;Energia;UN;Compra;15;3;12;0;0;0;3;3;02/11/2026;2;;0;12
+830500;Cabo de rede Cat6 externo 305 m;Redes;RL;Compra;17;0;17;5;4;4;3;3;08/11/2026;0;;377;114
+831042;Cabo USB-C para Lightning 1 m;Cabos e adaptadores;UN;Compra;26;13;13;0;0;0;2;2;18/11/2026;0;;26;13
+831071;Hub USB 4 portas;Cabos e adaptadores;UN;Compra;5;1;4;1;1;1;1;1;21/11/2026;0;;93;28
+830715;Fonte para notebook 90 W;Energia;UN;Compra;3;0;3;0;0;0;1;1;03/12/2026;0;;23;7
+830293;HD externo 1 TB;Armazenamento;UN;Transferência;46;12;34;71;0;0;4;3;18/10/2026;17;;195;
+831117;Cabo DisplayPort 2 m;Cabos e adaptadores;UN;Transferência;44;4;40;55;0;0;4;4;22/10/2026;13;;656;
+830638;Nobreak 600 VA;Energia;UN;Transferência;68;3;65;103;0;0;4;3;08/11/2026;0;;266;
+831100;Extensor USB 3 m;Cabos e adaptadores;UN;Transferência;51;16;35;58;0;0;4;4;08/11/2026;0;;104;
+830988;Cabo HDMI 3 m;Cabos e adaptadores;UN;Transferência;23;3;20;48;0;0;2;2;13/11/2026;0;;186;
+830089;Headset USB com microfone;Periféricos;UN;Transferência;16;8;8;18;0;0;2;1;05/11/2026;0;;0;
+830126;Webcam Full HD;Periféricos;UN;Com pedido de compra;27;5;22;0;24;0;3;3;20/10/2026;15;22/11/2026;61;
+830014;Mouse sem fio ergonômico;Periféricos;UN;Com pedido de compra;45;9;36;0;42;0;4;4;15/11/2026;0;30/11/2026;856;
+830221;SSD NVMe 1 TB;Armazenamento;UN;Com pedido de compra;30;9;21;0;25;0;1;1;14/12/2026;0;03/12/2026;367;
+830034;Mouse óptico USB;Periféricos;UN;Com pedido de compra;20;7;13;0;18;0;1;1;14/12/2026;0;10/12/2026;601;
+830679;Filtro de linha 8 tomadas;Energia;UN;Com pedido de compra;7;2;5;0;18;0;3;2;16/11/2026;0;16/11/2026;93;
+831049;Adaptador USB-C para HDMI;Cabos e adaptadores;UN;Com pedido de compra;5;1;4;0;11;0;1;1;24/11/2026;0;03/12/2026;22;
+830789;Toner preto alto rendimento;Impressão;CX;Com pedido de compra;7;3;4;0;17;0;3;3;12/11/2026;0;28/11/2026;24;
+830331;HD externo 2 TB;Armazenamento;UN;Transferência com PC;1;0;1;0;0;21;1;1;15/10/2026;20;08/11/2026;22;
+830821;Toner preto padrão;Impressão;CX;Transferência com PC;61;24;37;0;0;45;3;2;30/10/2026;5;14/11/2026;0;
+830383;Cabo de rede Cat5e azul 305 m;Redes;RL;Transferência com PC;40;14;26;0;8;44;4;3;04/11/2026;0;08/11/2026;114;
+830765;Carregador USB-C 20 W;Energia;UN;Transferência com PC;22;2;20;0;0;35;2;2;04/11/2026;0;12/11/2026;0;
+830237;Pen drive 32 GB;Armazenamento;UN;Transferência com PC;22;3;19;0;0;23;2;2;18/12/2026;0;22/11/2026;86;
+831092;Hub USB-C 7 em 1;Cabos e adaptadores;UN;Transferência com PC;22;5;17;0;0;20;2;2;21/11/2026;0;25/11/2026;58;
+830429;Cabo de rede Cat6 azul 305 m;Redes;RL;Transferência com PC;20;8;12;0;0;16;4;3;07/11/2026;0;10/11/2026;196;
+830895;Etiqueta adesiva A4 (caixa 100 folhas);Impressão;CX;Transferência com PC;5;0;5;0;0;19;1;1;28/11/2026;0;28/11/2026;389;
+831027;Cabo USB-C 1 m;Cabos e adaptadores;UN;Com estoque;44;46;0;0;0;0;4;4;16/10/2026;19;;766;
+830610;Adaptador Wi-Fi USB;Redes e conectividade;UN;Com estoque;29;54;0;20;0;0;4;4;21/10/2026;14;;56;
+830622;Conector RJ45 Cat6 (pacote 100);Redes e conectividade;UN;Com estoque;32;36;0;0;0;0;3;3;22/10/2026;13;;152;
+830069;Teclado sem fio compacto;Periféricos;UN;Com estoque;37;50;0;0;0;0;4;4;28/10/2026;7;;58;
+831054;Adaptador HDMI para VGA;Cabos e adaptadores;UN;Com estoque;2;5;0;60;0;0;1;1;01/11/2026;3;;307;
+830868;Cartucho de tinta colorido;Impressão;CX;Com estoque;13;27;0;60;0;0;2;2;03/11/2026;1;;56;
+830523;Roteador Wi-Fi dual band;Redes e conectividade;UN;Com estoque;20;41;0;0;0;0;4;3;03/11/2026;1;;696;
+830858;Cartucho de tinta preto;Impressão;CX;Com estoque;20;32;0;20;0;0;3;3;07/11/2026;0;;374;
+830204;SSD SATA 240 GB;Armazenamento;UN;Com estoque;11;36;0;0;0;0;3;3;08/11/2026;0;;64;
+830671;Filtro de linha 5 tomadas;Energia;UN;Com estoque;22;34;0;60;0;0;2;2;14/11/2026;0;;60;
+830566;Switch 16 portas gigabit;Redes e conectividade;UN;Com estoque;12;15;0;60;0;0;1;1;18/11/2026;0;;754;
+830460;Cabo de rede Cat6 cinza 305 m;Redes;RL;Com estoque;20;24;0;0;0;0;1;1;14/12/2026;0;;621;
+830213;SSD NVMe 512 GB;Armazenamento;UN;Com estoque;10;13;0;20;0;0;1;1;13/11/2026;0;;192;
+830134;Mousepad com apoio de punho;Periféricos;UN;Com estoque;3;13;0;0;0;0;1;1;16/11/2026;0;;331;
+830346;Cartão microSD 64 GB;Armazenamento;UN;Com estoque;14;34;0;0;0;0;2;1;06/11/2026;0;;0;
+830590;Repetidor Wi-Fi;Redes e conectividade;UN;Com estoque;12;21;0;60;0;0;1;1;27/11/2026;0;;54;

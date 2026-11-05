@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sugestão de Abastecimento</title>
+<meta name="description" content="Demo com dados fictícios: de onde atender cada material da carteira (estoque, transferência, pedido de compra ou compra nova).">
+<!-- Cartão de compartilhamento (LinkedIn, WhatsApp, Teams) -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://olandamatheus.github.io/replenishment-suggester/">
+<meta property="og:title" content="Sugestão de abastecimento: estoque, transferência ou compra">
+<meta property="og:description" content="Regras em SQL (DuckDB) que decidem de onde atender cada material da carteira: estoque da filial, transferência do depósito, pedido de compra em andamento ou compra nova. Dados fictícios.">
+<meta property="og:image" content="https://olandamatheus.github.io/replenishment-suggester/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="627">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..800&display=swap" rel="stylesheet">
+<style>
+/* ===== Tokens: mesma paleta do contract-kpi-dashboard, para os projetos parecerem uma família ===== */
+:root {
+  --papel: #EDF0EB; --papel-2: #E3E8E2; --tinta: #1C2B2A; --tinta-2: #55655F;
+  --linha: #C6CFC8; --trilho: #D3DAD4; --foco: #4D6A8A;
+  /* Uma cor por tipo de sugestão, do mais tranquilo (estoque) ao que exige ação (compra) */
+  --t-estoque: #2F6F62; --t-pc: #4D6A8A; --t-transf-pc: #6B5B8A; --t-transf: #9A6400; --t-compra: #A23B3B;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --papel: #121A19; --papel-2: #18221F; --tinta: #E2E9E5; --tinta-2: #9AABA4;
+    --linha: #2C3936; --trilho: #26322F; --foco: #8FAACB;
+    --t-estoque: #6FB3A3; --t-pc: #8FAACB; --t-transf-pc: #B3A3D6; --t-transf: #D9A441; --t-compra: #E07A72;
+  }
+}
+:root[data-theme="dark"] {
+  --papel: #121A19; --papel-2: #18221F; --tinta: #E2E9E5; --tinta-2: #9AABA4;
+  --linha: #2C3936; --trilho: #26322F; --foco: #8FAACB;
+  --t-estoque: #6FB3A3; --t-pc: #8FAACB; --t-transf-pc: #B3A3D6; --t-transf: #D9A441; --t-compra: #E07A72;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--papel); color: var(--tinta);
+  font-family: "Archivo", system-ui, sans-serif; font-variation-settings: "wdth" 100;
+  font-size: 16px; line-height: 1.5; font-feature-settings: "tnum" 1;
+}
+.pagina { max-width: 1180px; margin: 0 auto; padding: 32px 16px 64px; }
+@media (min-width: 720px) { .pagina { padding: 48px 32px 80px; } }
+:focus-visible { outline: 2px solid var(--foco); outline-offset: 2px; }
+
+.titulo { margin: 0; font-size: clamp(2.4rem, 7vw, 4.2rem); line-height: 0.95; font-weight: 750;
+  font-variation-settings: "wdth" 62; letter-spacing: -0.01em; }
+.resumo { margin: 16px 0 0; max-width: 64ch; font-size: 1.05rem; color: var(--tinta-2); }
+.resumo strong { color: var(--tinta); font-weight: 650; }
+.aviso { margin: 8px 0 0; font-size: 0.85rem; color: var(--tinta-2); }
+
+/* ===== Totais ===== */
+.totais { display: grid; grid-template-columns: repeat(2, 1fr); margin: 32px 0 0; border-top: 2px solid var(--tinta); }
+@media (min-width: 720px) { .totais { grid-template-columns: repeat(4, 1fr); } }
+.total { padding: 14px 16px 16px 0; border-bottom: 1px solid var(--linha); }
+@media (min-width: 720px) {
+  .total { border-bottom: 0; padding-left: 16px; border-left: 1px solid var(--linha); }
+  .total:first-child { border-left: 0; padding-left: 0; }
+}
+.total dt { font-size: 0.85rem; color: var(--tinta-2); }
+.total dd { margin: 2px 0 0; font-size: 1.9rem; font-weight: 650; font-variation-settings: "wdth" 75; line-height: 1.1; }
+.total dd small { font-size: 0.9rem; font-weight: 400; color: var(--tinta-2); font-variation-settings: "wdth" 100; }
+
+section { margin-top: 56px; }
+.secao-titulo { margin: 0; font-size: 1.5rem; font-weight: 700; font-variation-settings: "wdth" 75; }
+.secao-texto { margin: 6px 0 0; max-width: 68ch; color: var(--tinta-2); }
+
+/* ===== Distribuição por tipo: barra empilhada, cada fatia é um filtro ===== */
+.cascata { margin-top: 20px; }
+.barra { display: flex; height: 40px; border-radius: 4px; overflow: hidden; gap: 2px; }
+.fatia { border: 0; padding: 0; cursor: pointer; min-width: 6px; transition: opacity .12s; }
+.fatia[aria-pressed="false"] { opacity: 0.25; }
+@media (prefers-reduced-motion: reduce) { .fatia { transition: none; } }
+.legenda { display: grid; grid-template-columns: 1fr; gap: 0; margin-top: 16px; border-top: 1px solid var(--linha); }
+@media (min-width: 720px) { .legenda { grid-template-columns: repeat(5, 1fr); border-top: 0; } }
+.leg { font: inherit; color: inherit; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--linha);
+  padding: 10px 12px 10px 0; cursor: pointer; display: grid; grid-template-columns: auto 1fr auto; gap: 2px 8px; align-items: baseline;
+  align-content: start; /* <button> centraliza o conteúdo na vertical por padrão; sem isso as colunas desalinham */ }
+@media (min-width: 720px) { .leg { grid-template-columns: auto 1fr; border-bottom: 0; border-top: 3px solid transparent; padding-top: 10px; } }
+.leg[aria-pressed="false"] { opacity: 0.45; }
+.leg .ponto { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+.leg .nome { font-weight: 650; font-size: 0.95rem; }
+.leg .n { font-size: 1.5rem; font-weight: 650; font-variation-settings: "wdth" 75; line-height: 1; }
+@media (min-width: 720px) { .leg .n { grid-column: 1 / -1; order: -1; } }
+.leg .regra { grid-column: 1 / -1; font-size: 0.82rem; color: var(--tinta-2); line-height: 1.35; }
+
+/* ===== Alerta para a expedição ===== */
+.alerta { margin-top: 28px; padding: 14px 16px; border-left: 3px solid var(--t-estoque); background: var(--papel-2); max-width: 760px; }
+.alerta b { font-weight: 650; }
+.alerta button { font: inherit; color: var(--tinta); background: none; border: 0; padding: 0; text-decoration: underline; cursor: pointer; }
+
+/* ===== Filtros e tabela ===== */
+.filtros { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; margin: 20px 0 8px; }
+.campo { display: inline-flex; align-items: center; gap: 6px; font-size: 0.88rem; color: var(--tinta-2); }
+.campo select, .campo input[type="search"] {
+  font: inherit; color: var(--tinta); background: var(--papel); border: 1px solid var(--linha); border-radius: 6px; padding: 4px 8px;
+}
+.campo input[type="search"] { width: 210px; }
+.contagem { font-size: 0.88rem; color: var(--tinta-2); margin-left: auto; }
+.limpar { font: inherit; font-size: 0.88rem; color: var(--tinta); background: none; border: 1px solid var(--linha); border-radius: 999px; padding: 4px 11px; cursor: pointer; }
+
+.tabela-caixa { margin-top: 8px; overflow-x: auto; border-top: 2px solid var(--tinta); }
+table { width: 100%; border-collapse: collapse; font-size: 0.88rem; min-width: 980px; }
+th, td { padding: 9px 10px; text-align: left; border-bottom: 1px solid var(--linha); white-space: nowrap; }
+th { font-weight: 650; font-size: 0.82rem; color: var(--tinta-2); vertical-align: bottom; }
+th button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-align: inherit; }
+th[aria-sort="ascending"] button::after { content: " ▲"; font-size: 0.7em; }
+th[aria-sort="descending"] button::after { content: " ▼"; font-size: 0.7em; }
+td.num, th.num { text-align: right; }
+td.desc { white-space: normal; min-width: 210px; }
+td.desc small { display: block; color: var(--tinta-2); }
+.tag { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; }
+.tag i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.atraso { color: var(--t-compra); font-weight: 650; }
+.mudo { color: var(--tinta-2); }
+.vazio { padding: 24px 0; color: var(--tinta-2); }
+
+footer { margin-top: 64px; padding-top: 16px; border-top: 1px solid var(--linha); font-size: 0.85rem; color: var(--tinta-2); }
+footer a { color: inherit; }
+</style>
+</head>
+<body>
+<main class="pagina">
+  <header>
+    <h1 class="titulo">Sugestão de<br>abastecimento</h1>
+    <p class="resumo" id="resumo"></p>
+    <p class="aviso">Demonstração com dados fictícios. Nenhuma empresa, cliente ou material real.</p>
+  </header>
+
+  <dl class="totais" id="totais"></dl>
+
+  <section aria-labelledby="t-cascata">
+    <h2 class="secao-titulo" id="t-cascata">De onde vem cada material</h2>
+    <p class="secao-texto">Cada material com pedido de venda em aberto na filial recebe uma única sugestão. As regras são testadas nesta ordem, e a primeira que cobre a falta vence. Clique em um tipo para filtrar a tabela.</p>
+    <div class="cascata">
+      <div class="barra" id="barra" role="group" aria-label="Filtrar por tipo de sugestão"></div>
+      <div class="legenda" id="legenda"></div>
+    </div>
+    <div class="alerta" id="alerta" hidden></div>
+  </section>
+
+  <section aria-labelledby="t-tab">
+    <h2 class="secao-titulo" id="t-tab">Materiais da carteira</h2>
+    <p class="secao-texto">Ordenada por prioridade: compras primeiro, depois o que está há mais tempo atrasado. Clique no nome de uma coluna para mudar a ordem.</p>
+    <div class="filtros">
+      <label class="campo">Buscar
+        <input type="search" id="f-busca" placeholder="Código ou descrição" autocomplete="off">
+      </label>
+      <label class="campo">Categoria
+        <select id="f-categoria"><option value="">Todas</option></select>
+      </label>
+      <label class="campo"><input type="checkbox" id="f-atraso"> Só atrasados</label>
+      <button type="button" class="limpar" id="limpar" hidden>Limpar filtros</button>
+      <span class="contagem" id="contagem" aria-live="polite"></span>
+    </div>
+    <div class="tabela-caixa">
+      <table>
+        <thead><tr id="cabecalho"></tr></thead>
+        <tbody id="corpo"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>
+    Projeto de portfólio de Matheus Olanda. Bases geradas por <code>scripts/gerar_bases.py</code>, regras em <code>sql/02_sugestao.sql</code> (DuckDB).
+    <a href="https://github.com/OlandaMatheus/replenishment-suggester">Código no GitHub</a>
+  </footer>
+</main>
+
+<script src="data/saida/sugestoes.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  const BASE = window.BASE_SUGESTOES;
+  const itens = BASE.itens;
+  const REF = (() => { const [a, m, d] = BASE.data_referencia.split("-").map(Number); return new Date(a, m - 1, d); })();
+
+  // Ordem da cascata = ordem do CASE no SQL. Texto da regra fica junto para a legenda.
+  const TIPOS = [
+    { id: "Com estoque", cor: "var(--t-estoque)", regra: "Estoque da filial cobre a demanda" },
+    { id: "Transferência com PC", cor: "var(--t-transf-pc)", regra: "Pedido de compra do Depósito Central cobre a falta" },
+    { id: "Com pedido de compra", cor: "var(--t-pc)", regra: "Pedido de compra da própria filial cobre a falta" },
+    { id: "Transferência", cor: "var(--t-transf)", regra: "Estoque do Depósito Central cobre a falta" },
+    { id: "Compra", cor: "var(--t-compra)", regra: "Ninguém cobre: comprar " + Math.round(BASE.fator_compra * 100) + "% do giro de 12 meses, no mínimo a falta" },
+  ];
+  const COR = Object.fromEntries(TIPOS.map(t => [t.id, t.cor]));
+  const PRIORIDADE = { "Compra": 1, "Transferência": 2, "Com pedido de compra": 3, "Transferência com PC": 4, "Com estoque": 5 };
+
+  const fmt = v => v == null ? "" : Number(v).toLocaleString("pt-BR", { maximumFractionDigits: 3 });
+  const dataBR = iso => { if (!iso) return ""; const [a, m, d] = iso.split("-"); return `${d}/${m}/${a}`; };
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  // Busca sem acento e sem caixa: "hub" acha "Hub", "ergonomico" acha "ergonômico"
+  const norm = s => String(s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+
+  // ===== Estado =====
+  const estado = { tipos: new Set(), busca: "", categoria: "", atraso: false, col: "prioridade", dir: 1 };
+  const ativo = id => estado.tipos.size === 0 || estado.tipos.has(id);
+
+  function filtrados() {
+    const q = norm(estado.busca.trim());
+    return itens.filter(i =>
+      ativo(i.sugestao) &&
+      (!estado.categoria || i.categoria === estado.categoria) &&
+      (!estado.atraso || i.dias_atraso > 0) &&
+      (!q || norm(i.material + " " + i.descricao).includes(q)));
+  }
+
+  // ===== Resumo e totais =====
+  // PONTO CRÍTICO: as unidades são diferentes (UN, CX, RL), então os totais são
+  // contagens de materiais, nunca soma de quantidades entre materiais.
+  function desenharResumo() {
+    const conta = t => itens.filter(i => i.sugestao === t).length;
+    const atrasados = itens.filter(i => i.dias_atraso > 0).length;
+    const semCompra = itens.length - conta("Compra");
+    document.getElementById("resumo").innerHTML =
+      `Em ${REF.toLocaleDateString("pt-BR")}, <strong>${itens.length} materiais</strong> têm pedido de venda em aberto na filial. ` +
+      `<strong>${semCompra}</strong> podem ser atendidos com o que já existe (estoque, transferência ou pedido de compra em andamento) ` +
+      `e <strong>${conta("Compra")}</strong> precisam de compra nova.`;
+    const itensOv = itens.reduce((s, i) => s + i.itens_ov, 0);
+    const dados = [
+      ["Materiais na carteira", itens.length, `${itensOv} itens de pedido`],
+      ["Atendidos sem comprar", semCompra, Math.round(semCompra / itens.length * 100) + "% dos materiais"],
+      ["Precisam de compra", conta("Compra"), ""],
+      ["Com entrega atrasada", atrasados, "remessa já vencida"],
+    ];
+    document.getElementById("totais").innerHTML = dados.map(([t, v, s]) =>
+      `<div class="total"><dt>${t}</dt><dd>${v}${s ? ` <small>${s}</small>` : ""}</dd></div>`).join("");
+  }
+
+  // ===== Barra da cascata + legenda (os dois filtram) =====
+  function desenharCascata() {
+    const total = itens.length;
+    const n = id => itens.filter(i => i.sugestao === id).length;
+    const pressionado = id => estado.tipos.size === 0 || estado.tipos.has(id);
+    document.getElementById("barra").innerHTML = TIPOS.map(t => {
+      const q = n(t.id);
+      return q ? `<button type="button" class="fatia" data-tipo="${t.id}" aria-pressed="${pressionado(t.id)}"
+        title="${t.id}: ${q} materiais" aria-label="${t.id}: ${q} materiais"
+        style="flex:${q} 1 0;background:${t.cor}"></button>` : "";
+    }).join("");
+    document.getElementById("legenda").innerHTML = TIPOS.map(t => `
+      <button type="button" class="leg" data-tipo="${t.id}" aria-pressed="${pressionado(t.id)}"
+        style="${estado.tipos.has(t.id) ? `border-top-color:${t.cor}` : ""}">
+        <span class="ponto" style="background:${t.cor}"></span><span class="nome">${t.id}</span>
+        <span class="n">${n(t.id)} <small class="mudo" style="font-size:.8rem;font-weight:400">(${Math.round(n(t.id) / total * 100)}%)</small></span>
+        <span class="regra">${t.regra}</span>
+      </button>`).join("");
+    document.querySelectorAll("[data-tipo]").forEach(b => b.addEventListener("click", () => {
+      const id = b.dataset.tipo;
+      // Clique alterna o tipo; se todos ficarem marcados, volta ao estado "sem filtro"
+      estado.tipos.has(id) ? estado.tipos.delete(id) : estado.tipos.add(id);
+      if (estado.tipos.size === TIPOS.length) estado.tipos.clear();
+      atualizar();
+    }));
+  }
+
+  // ===== Alerta: estoque parado com entrega vencida (problema de expedição, não de compra) =====
+  function desenharAlerta() {
+    const casos = itens.filter(i => i.sugestao === "Com estoque" && i.dias_atraso > 0);
+    const el = document.getElementById("alerta");
+    if (!casos.length) { el.hidden = true; return; }
+    el.hidden = false;
+    el.innerHTML = `<b>${casos.length} materiais têm estoque na filial e mesmo assim estão com a entrega vencida.</b> ` +
+      `O gargalo aí não é compra, é separação ou expedição. ` +
+      `<button type="button" id="ver-alerta">Ver esses materiais</button>`;
+    document.getElementById("ver-alerta").addEventListener("click", () => {
+      estado.tipos = new Set(["Com estoque"]); estado.atraso = true;
+      document.getElementById("f-atraso").checked = true;
+      estado.col = "dias_atraso"; estado.dir = -1;
+      atualizar();
+      document.getElementById("t-tab").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
+
+  // ===== Tabela =====
+  const COLUNAS = [
+    ["descricao", "Material", ""], ["sugestao", "Sugestão", ""],
+    ["demanda", "Demanda", "num"], ["est_filial", "Estoque filial", "num"], ["falta", "Falta", "num"],
+    ["origem", "Cobertura usada", "num"], ["previsao_pc", "Previsão PC", ""],
+    ["dias_atraso", "Atraso (dias)", "num"], ["qtd_compra", "Comprar", "num"],
+  ];
+  // Quanto da fonte escolhida está disponível: deixa visível por que a regra foi aplicada
+  function origem(i) {
+    switch (i.sugestao) {
+      case "Transferência com PC": return { v: i.pc_cd, txt: `${fmt(i.pc_cd)} <small class="mudo">PC do CD</small>` };
+      case "Com pedido de compra": return { v: i.pc_filial, txt: `${fmt(i.pc_filial)} <small class="mudo">PC da filial</small>` };
+      case "Transferência": return { v: i.est_cd, txt: `${fmt(i.est_cd)} <small class="mudo">estoque CD</small>` };
+      default: return { v: null, txt: `<span class="mudo">-</span>` };
+    }
+  }
+  const valorOrd = (i, k) => k === "prioridade" ? [PRIORIDADE[i.sugestao], -i.dias_atraso, -i.falta]
+    : k === "origem" ? origem(i).v : i[k];
+
+  function cmp(a, b) {
+    const va = valorOrd(a, estado.col), vb = valorOrd(b, estado.col);
+    if (Array.isArray(va)) { for (let x = 0; x < va.length; x++) if (va[x] !== vb[x]) return (va[x] - vb[x]) * estado.dir; return 0; }
+    if (va == null && vb == null) return 0;
+    if (va == null) return 1;  // vazios sempre no fim, em qualquer direção
+    if (vb == null) return -1;
+    return (typeof va === "string" ? va.localeCompare(vb, "pt-BR") : va - vb) * estado.dir;
+  }
+
+  function desenharTabela() {
+    document.getElementById("cabecalho").innerHTML = COLUNAS.map(([k, t, cls]) => {
+      const s = estado.col === k ? (estado.dir > 0 ? "ascending" : "descending") : "none";
+      return `<th class="${cls}" aria-sort="${s}"><button type="button" data-col="${k}">${t}</button></th>`;
+    }).join("");
+    document.querySelectorAll("#cabecalho button").forEach(b => b.addEventListener("click", () => {
+      const k = b.dataset.col;
+      // Primeiro clique em número ordena do maior para o menor, que é o que se quer ver
+      const numerica = COLUNAS.find(c => c[0] === k)[2] === "num";
+      estado.dir = estado.col === k ? -estado.dir : (numerica ? -1 : 1);
+      estado.col = k; desenharTabela();
+    }));
+
+    const linhas = filtrados().sort(cmp);
+    document.getElementById("contagem").textContent = `${linhas.length} de ${itens.length} materiais`;
+    const corpo = document.getElementById("corpo");
+    if (!linhas.length) {
+      corpo.innerHTML = `<tr><td colspan="${COLUNAS.length}" class="vazio">Nenhum material com esses filtros.</td></tr>`;
+      return;
+    }
+    corpo.innerHTML = linhas.map(i => `<tr>
+      <td class="desc">${esc(i.descricao)}<small>${i.material} · ${esc(i.categoria)} · ${i.unidade}</small></td>
+      <td><span class="tag"><i style="background:${COR[i.sugestao]}"></i>${i.sugestao}</span></td>
+      <td class="num">${fmt(i.demanda)} <small class="mudo">${i.itens_ov} OV</small></td>
+      <td class="num">${fmt(i.est_filial)}</td>
+      <td class="num">${i.falta ? fmt(i.falta) : `<span class="mudo">0</span>`}</td>
+      <td class="num">${origem(i).txt}</td>
+      <td>${i.previsao_pc ? dataBR(i.previsao_pc) : `<span class="mudo">-</span>`}</td>
+      <td class="num">${i.dias_atraso ? `<span class="atraso">${i.dias_atraso}</span>` : `<span class="mudo">0</span>`}</td>
+      <td class="num">${i.qtd_compra != null ? `<b>${fmt(i.qtd_compra)}</b>` : `<span class="mudo">-</span>`}</td>
+    </tr>`).join("");
+  }
+
+  // ===== Filtros =====
+  const selCat = document.getElementById("f-categoria");
+  [...new Set(itens.map(i => i.categoria))].sort().forEach(c => selCat.add(new Option(c, c)));
+  selCat.addEventListener("change", e => { estado.categoria = e.target.value; atualizar(); });
+  document.getElementById("f-busca").addEventListener("input", e => { estado.busca = e.target.value; atualizar(); });
+  document.getElementById("f-atraso").addEventListener("change", e => { estado.atraso = e.target.checked; atualizar(); });
+  document.getElementById("limpar").addEventListener("click", () => {
+    Object.assign(estado, { tipos: new Set(), busca: "", categoria: "", atraso: false, col: "prioridade", dir: 1 });
+    selCat.value = ""; document.getElementById("f-busca").value = ""; document.getElementById("f-atraso").checked = false;
+    atualizar();
+  });
+
+  function atualizar() {
+    const algum = estado.tipos.size || estado.busca || estado.categoria || estado.atraso;
+    document.getElementById("limpar").hidden = !algum;
+    desenharCascata(); desenharTabela();
+  }
+
+  desenharResumo(); desenharAlerta(); atualizar();
+})();
+</script>
+</body>
+</html>

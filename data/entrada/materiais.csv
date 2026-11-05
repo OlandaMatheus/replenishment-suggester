@@ -1,0 +1,59 @@
+Material;Descricao;Unidade;Categoria
+000000000000830010;Mouse sem fio básico;UN;Periféricos
+000000000000830014;Mouse sem fio ergonômico;UN;Periféricos
+000000000000830034;Mouse óptico USB;UN;Periféricos
+000000000000830052;Teclado USB ABNT2;UN;Periféricos
+000000000000830069;Teclado sem fio compacto;UN;Periféricos
+000000000000830080;Kit teclado e mouse sem fio;UN;Periféricos
+000000000000830089;Headset USB com microfone;UN;Periféricos
+000000000000830126;Webcam Full HD;UN;Periféricos
+000000000000830134;Mousepad com apoio de punho;UN;Periféricos
+000000000000830174;Suporte para notebook;UN;Periféricos
+000000000000830204;SSD SATA 240 GB;UN;Armazenamento
+000000000000830209;SSD SATA 480 GB;UN;Armazenamento
+000000000000830213;SSD NVMe 512 GB;UN;Armazenamento
+000000000000830221;SSD NVMe 1 TB;UN;Armazenamento
+000000000000830237;Pen drive 32 GB;UN;Armazenamento
+000000000000830254;Pen drive 64 GB;UN;Armazenamento
+000000000000830289;Pen drive 128 GB;UN;Armazenamento
+000000000000830293;HD externo 1 TB;UN;Armazenamento
+000000000000830331;HD externo 2 TB;UN;Armazenamento
+000000000000830346;Cartão microSD 64 GB;UN;Armazenamento
+000000000000830383;Cabo de rede Cat5e azul 305 m;RL;Redes
+000000000000830412;Cabo de rede Cat5e cinza 305 m;RL;Redes
+000000000000830429;Cabo de rede Cat6 azul 305 m;RL;Redes
+000000000000830460;Cabo de rede Cat6 cinza 305 m;RL;Redes
+000000000000830500;Cabo de rede Cat6 externo 305 m;RL;Redes
+000000000000830520;Cabo coaxial RG6 100 m;RL;Redes
+000000000000830523;Roteador Wi-Fi dual band;UN;Redes e conectividade
+000000000000830536;Switch 8 portas gigabit;UN;Redes e conectividade
+000000000000830566;Switch 16 portas gigabit;UN;Redes e conectividade
+000000000000830590;Repetidor Wi-Fi;UN;Redes e conectividade
+000000000000830610;Adaptador Wi-Fi USB;UN;Redes e conectividade
+000000000000830622;Conector RJ45 Cat6 (pacote 100);UN;Redes e conectividade
+000000000000830638;Nobreak 600 VA;UN;Energia
+000000000000830662;Nobreak 1200 VA;UN;Energia
+000000000000830671;Filtro de linha 5 tomadas;UN;Energia
+000000000000830679;Filtro de linha 8 tomadas;UN;Energia
+000000000000830706;Fonte para notebook 65 W;UN;Energia
+000000000000830715;Fonte para notebook 90 W;UN;Energia
+000000000000830740;Estabilizador 500 VA;UN;Energia
+000000000000830765;Carregador USB-C 20 W;UN;Energia
+000000000000830784;Papel A4 75 g (caixa 10 resmas);CX;Impressão
+000000000000830789;Toner preto alto rendimento;CX;Impressão
+000000000000830821;Toner preto padrão;CX;Impressão
+000000000000830858;Cartucho de tinta preto;CX;Impressão
+000000000000830868;Cartucho de tinta colorido;CX;Impressão
+000000000000830895;Etiqueta adesiva A4 (caixa 100 folhas);CX;Impressão
+000000000000830903;Papel fotográfico A4 (caixa 50 folhas);CX;Impressão
+000000000000830941;Fita para impressora térmica;CX;Impressão
+000000000000830962;Cabo HDMI 1,8 m;UN;Cabos e adaptadores
+000000000000830988;Cabo HDMI 3 m;UN;Cabos e adaptadores
+000000000000831027;Cabo USB-C 1 m;UN;Cabos e adaptadores
+000000000000831042;Cabo USB-C para Lightning 1 m;UN;Cabos e adaptadores
+000000000000831049;Adaptador USB-C para HDMI;UN;Cabos e adaptadores
+000000000000831054;Adaptador HDMI para VGA;UN;Cabos e adaptadores
+000000000000831071;Hub USB 4 portas;UN;Cabos e adaptadores
+000000000000831092;Hub USB-C 7 em 1;UN;Cabos e adaptadores
+000000000000831100;Extensor USB 3 m;UN;Cabos e adaptadores
+000000000000831117;Cabo DisplayPort 2 m;UN;Cabos e adaptadores
